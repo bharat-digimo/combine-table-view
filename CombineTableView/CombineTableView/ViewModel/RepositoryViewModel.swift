@@ -5,25 +5,20 @@
 //  Created by Bharat Lal on 26/03/23.
 //
 
-import Foundation
 import Combine
+import Foundation
 
-class RepositoryViewModel {
+@MainActor
+final class RepositoryViewModel: ObservableObject {
+    @Published var repositories: [Repository] = []
     private var cancellables = Set<AnyCancellable>()
-    @Published var repositories = [Repository]()
-    
-    func getRepositories() {
-        NetworkManager.shared.fetch(with: Repository.self)
-            .sink { complition in
-                switch complition {
-                case .failure(let error):
-                    print("finished with error:  \(error.localizedDescription)")
-                case .finished:
-                    print("Finished successfully")
-                }
-            } receiveValue: { [weak self] repositories in
-                self?.repositories = repositories
-            }
-            .store(in: &cancellables)
+
+    func getRepositories() async {
+        do {
+            let repos = try await NetworkManager.shared.fetch(with: Repository.self)
+            repositories = repos
+        } catch {
+            print("Error fetching repositories: \(error.localizedDescription)")
+        }
     }
 }

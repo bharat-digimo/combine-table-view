@@ -17,8 +17,10 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        viewModel.getRepositories()
         bindTableView()
+        Task {
+            await viewModel.getRepositories()
+        }
     }
     
     func bindTableView() {
